@@ -1,0 +1,95 @@
+heartbeat.monitors:
+
+#TEST MONITOR
+# Configure monitors
+heartbeat.monitors:
+
+- type: http
+  enabled: true
+  schedule: '@every 40s'
+  urls: ["https://api.rspp.tmnet.app"]
+  ipv4: true
+  ipv6: true
+  mode: any
+  timeout: 5s
+  check.request:
+    method: "GET"
+  check.response:
+    status: 200
+
+- type: http
+  enabled: true
+  schedule: '@every 41s'
+  urls: ["https://cms.rspp.tmnet.app"]
+  ipv4: true
+  ipv6: true
+  mode: any
+  timeout: 5s
+  check.request:
+    method: "GET"
+  check.response:
+    status: 200
+
+- type: tcp
+  name: postgresql
+  enabled: true
+  schedule: '@every 42s'
+  hosts: ["tcp://35.198.221.250:5432"]
+
+- type: tcp
+  name: rabbitmq
+  enabled: true
+  schedule: '@every 43s'
+  hosts: ["tcp://35.198.221.250:5672"]
+
+- type: tcp
+  name: redis
+  enabled: true
+  schedule: '@every 44s'
+  hosts: ["tcp://35.198.221.250:6379"]
+
+
+#dashboards.enabled: true
+
+#Monitor all containers using an icmp ping
+- type: icmp
+  schedule: '*/5 * * * * * *'
+  hosts: ["metricbeat","packetbeat","elasticsearch","kibana"]
+  ipv4: true
+  ipv6: true
+  mode: any
+  timeout: 16s
+  wait: 1s
+#Monitor the ES instance over http with a GET to the /  - checking for a 200 response
+- type: http
+  enabled: true
+  schedule: '@every 10s'
+  urls: ["http://elasticsearch:9200"]
+  ipv4: true
+  ipv6: true
+  mode: any
+  timeout: 5s
+  username: '${ES_USERNAME:elastic}'
+  password: '${ES_PASSWORD:changeme}'
+  check.request:
+    method: "GET"
+  check.response:
+    status: 200
+#Monitor the Kibana instance with a http GET to / - checking for a 200 response code
+- type: http
+  enabled: true
+  schedule: '@every 10s'
+  urls: ["http://kibana:5601"]
+  ipv4: true
+  ipv6: true
+  mode: any
+  timeout: 5s
+  check.request:
+    method: "GET"
+  check.response:
+    status: 200
+
+#Index any heartbeat data to our ES instance
+output.elasticsearch:
+  hosts: ["elasticsearch:9200"]
+logging.to_files: false
